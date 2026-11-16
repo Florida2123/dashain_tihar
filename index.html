@@ -5,7 +5,7 @@
   YEAR: [year]
 -->
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-accent="sakura" data-font="editorial" data-size="normal" data-grain="true" data-notes="true" data-wall="masonry" data-motion="full" data-cursor="true">
+<html lang="en" data-theme="light" data-accent="sakura" data-font="editorial" data-size="normal" data-grain="false" data-notes="true" data-wall="masonry" data-motion="full" data-cursor="true">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -31,14 +31,12 @@
   <script>
     (function() {
       try {
-        var raw = localStorage.getItem('festival-diary-v1');
+        localStorage.removeItem('festival-diary-v1');
+        var raw = localStorage.getItem('festival-diary-v2');
+        var doc = document.documentElement;
         if (raw) {
           var s = JSON.parse(raw);
-          var doc = document.documentElement;
-          if (s.theme) {
-            var th = s.theme === 'auto' ? 'light' : s.theme;
-            doc.setAttribute('data-theme', th);
-          }
+          if (s.theme) doc.setAttribute('data-theme', s.theme);
           if (s.accent) doc.setAttribute('data-accent', s.accent);
           if (s.customAccent) doc.style.setProperty('--color-accent-custom', s.customAccent);
           if (s.font) doc.setAttribute('data-font', s.font);
@@ -48,6 +46,8 @@
           if (s.wallLayout) doc.setAttribute('data-wall', s.wallLayout);
           if (s.motion) doc.setAttribute('data-motion', s.motion);
           if (typeof s.cursor === 'boolean') doc.setAttribute('data-cursor', s.cursor ? 'true' : 'false');
+        } else {
+          doc.setAttribute('data-theme', 'light');
         }
       } catch (err) {}
     })();
@@ -344,7 +344,7 @@
               <img src="images/Pork meats.jpg" alt="Cooking pork meats" width="600" height="750" loading="lazy" decoding="async">
             </figure>
             <figure class="media media-trio" data-kind="photo" data-group="dashain" data-caption="Laughing on the bamboo swing on the open meadow">
-              <img src="images/Swings2.jpg"  muted playsinline preload="metadata"></img>
+              <img src="images/Swings2.jpg" alt="Laughing on the bamboo swing on the open meadow" width="600" height="750" loading="lazy" decoding="async">
             </figure>
           </div>
         </article>
@@ -845,7 +845,7 @@
           <!-- Film Grain Switch -->
           <div class="setting-row">
             <label for="setting-grain-toggle" class="setting-label">Film grain</label>
-            <button type="button" class="toggle-switch is-active" id="setting-grain-toggle" role="switch" aria-checked="true" aria-label="Toggle subtle film grain texture">
+            <button type="button" class="toggle-switch" id="setting-grain-toggle" role="switch" aria-checked="false" aria-label="Toggle subtle film grain texture">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>
             </button>
           </div>

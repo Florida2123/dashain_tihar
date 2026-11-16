@@ -11,7 +11,7 @@
   /* ==========================================================================
      1. GLOBAL SETTINGS STORE & PERSISTENCE
      ========================================================================== */
-  var STORAGE_KEY = "festival-diary-v1";
+  var STORAGE_KEY = "festival-diary-v2";
 
   var DEFAULT_SETTINGS = {
     look: "default",
@@ -19,9 +19,9 @@
     accent: "sakura", // 'sakura' | 'makhamali' | 'sayapatri' | 'tika' | 'lilac' | 'custom'
     customAccent: "#BE3569",
     font: "editorial", // 'editorial' | 'modern' | 'soft'
-    grain: true,
+    grain: false,
     petals: true,
-    petalAmount: 45, // 0 to 100
+    petalAmount: 32, // 0 to 100
     petalSpeed: 1.0, // 0.3 to 2.0
     petalSize: 1.0, // 0.6 to 1.8
     petalWind: 0, // -100 to 100
@@ -38,6 +38,7 @@
 
   function loadSettings() {
     try {
+      localStorage.removeItem("festival-diary-v1");
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
@@ -371,18 +372,18 @@
     }
   }
 
+  var TARGET_FPS = 45;
+  var FRAME_INTERVAL = 1000 / TARGET_FPS; // ~22.2ms cap to avoid 120-144fps GPU drain
+
   function resizeCanvases() {
     if (!bgCanvas || !fgCanvas) return;
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var dpr =
-      w < 700
-        ? Math.min(window.devicePixelRatio || 1, 1.5)
-        : Math.min(window.devicePixelRatio || 1, 2);
+    var dpr = 1; // Petals are soft 48px pre-rendered shapes; 1x DPR cuts pixel fill-rate by 75% on Retina/4K screens
 
     bgCanvas.width = w * dpr;
     bgCanvas.height = h * dpr;
-    bgCtx.scale(dpr, dpr);
+    bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     if (w < 700) {
       // Skip foreground canvas entirely on mobile to save memory & composite passes
@@ -391,7 +392,7 @@
     } else {
       fgCanvas.width = w * dpr;
       fgCanvas.height = h * dpr;
-      fgCtx.scale(dpr, dpr);
+      fgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     updatePetalsCount();
@@ -415,10 +416,6 @@
   function runPetalLoop(now) {
     animFrameId = requestAnimationFrame(runPetalLoop);
 
-    // Clamped Delta Time (max 50ms)
-    var dt = Math.min(now - lastFrameTime, 50);
-    lastFrameTime = now;
-
     if (
       document.hidden ||
       !settings.petals ||
@@ -427,6 +424,13 @@
     ) {
       return;
     }
+
+    var elapsed = now - lastFrameTime;
+    if (elapsed < FRAME_INTERVAL) {
+      return;
+    }
+    var dt = Math.min(elapsed, 50);
+    lastFrameTime = now - (elapsed % FRAME_INTERVAL);
 
     var w = window.innerWidth;
     var h = window.innerHeight;
@@ -449,17 +453,19 @@
     }
 
     var sprites = spriteCache[palette] || spriteCache.sakura;
+    var dtNorm = dt / 16.66;
 
     for (var i = 0; i < petalsList.length; i++) {
       var p = petalsList[i];
       if (p.fg && w < 700) continue; // Skip foreground petals on mobile
       var ctx = p.fg ? fgCtx : bgCtx;
 
-      // Mouse Pointer Wake Push
+      // Mouse Pointer Wake Push (fast distSq check avoids Math.hypot on 99% of petals)
       var dx = p.x - mousePos.x;
       var dy = p.y - mousePos.y;
-      var dist = Math.hypot(dx, dy);
-      if (dist < 160 && dist > 0) {
+      var distSq = dx * dx + dy * dy;
+      if (distSq < 25600 && distSq > 0) {
+        var dist = Math.sqrt(distSq);
         var pushForce = (1 - dist / 160) * 1.8;
         p.x += (dx / dist) * pushForce;
         p.y += (dy / dist) * pushForce;
@@ -480,10 +486,10 @@
         effectiveScrollBoost;
       var horiz = sway * 0.04 + windForce * (0.4 + p.z);
 
-      p.y += fall * (dt / 16.66);
-      p.x += horiz * (dt / 16.66);
-      p.rot += p.spin * (dt / 16.66);
-      p.flipPhase += p.flipSpeed * (dt / 16.66);
+      p.y += fall * dtNorm;
+      p.x += horiz * dtNorm;
+      p.rot += p.spin * dtNorm;
+      p.flipPhase += p.flipSpeed * dtNorm;
 
       // Boundary Recycling
       if (p.y > h + 50) {
@@ -568,6 +574,21 @@
         spawnBloomBurst(e.clientX, e.clientY, 14);
       });
     }
+
+    // Suspend loop when document is hidden (switched tab / minimized)
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        if (animFrameId) {
+          cancelAnimationFrame(animFrameId);
+          animFrameId = null;
+        }
+      } else {
+        if (!animFrameId && settings.petals && settings.motion !== "off") {
+          lastFrameTime = performance.now();
+          animFrameId = requestAnimationFrame(runPetalLoop);
+        }
+      }
+    });
 
     // Start Simulation Loop
     lastFrameTime = performance.now();
@@ -666,7 +687,36 @@
       }
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    var scrollTicking = false;
+    window.addEventListener(
+      "scroll",
+      function () {
+        if (!scrollTicking) {
+          requestAnimationFrame(function () {
+            onScroll();
+            scrollTicking = false;
+          });
+          scrollTicking = true;
+        }
+      },
+      { passive: true },
+    );
+
+    // Pause offscreen marquee animation to save continuous compositing
+    var marquee = document.querySelector(".marquee-track");
+    if (marquee && "IntersectionObserver" in window) {
+      var marqueeObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            marquee.style.animationPlayState = entry.isIntersecting
+              ? "running"
+              : "paused";
+          });
+        },
+        { threshold: 0 },
+      );
+      marqueeObserver.observe(marquee);
+    }
     window.addEventListener(
       "resize",
       debounce(function () {
@@ -1568,16 +1618,68 @@
       mql.addListener(onPointerChange);
     }
 
+    var cursorRaf = null;
+
+    function scheduleCursorRender() {
+      if (!cursorRaf && isFinePointer && settings.cursor && settings.motion !== "off") {
+        cursorRaf = requestAnimationFrame(renderCursor);
+      }
+    }
+
+    // Render loop with smooth lerping that sleeps when motionless
+    function renderCursor() {
+      cursorRaf = null;
+      if (!isFinePointer || !settings.cursor || settings.motion === "off") return;
+
+      var dxDot = mouse.x - dotPos.x;
+      var dyDot = mouse.y - dotPos.y;
+      var dxRing = mouse.x - ringPos.x;
+      var dyRing = mouse.y - ringPos.y;
+
+      dotPos.x += dxDot * 0.75;
+      dotPos.y += dyDot * 0.75;
+      ringPos.x += dxRing * 0.25;
+      ringPos.y += dyRing * 0.25;
+
+      dot.style.transform =
+        "translate3d(" +
+        dotPos.x +
+        "px, " +
+        dotPos.y +
+        "px, 0) translate(-50%, -50%)";
+      ring.style.transform =
+        "translate3d(" +
+        ringPos.x +
+        "px, " +
+        ringPos.y +
+        "px, 0) translate(-50%, -50%)";
+
+      // If either dot or ring still has visible movement remaining, continue; otherwise sleep!
+      if (
+        Math.abs(dxRing) > 0.2 ||
+        Math.abs(dyRing) > 0.2 ||
+        Math.abs(dxDot) > 0.2 ||
+        Math.abs(dyDot) > 0.2
+      ) {
+        cursorRaf = requestAnimationFrame(renderCursor);
+      }
+    }
+
     window.addEventListener("mousemove", function (e) {
       if (!isFinePointer) return;
       mouse.x = e.clientX;
       mouse.y = e.clientY;
+      scheduleCursorRender();
     });
 
     window.addEventListener(
       "touchstart",
       function () {
         // Touch interaction: immediately hide custom cursor so it never gets stuck at tap position
+        if (cursorRaf) {
+          cancelAnimationFrame(cursorRaf);
+          cursorRaf = null;
+        }
         mouse.x = -100;
         mouse.y = -100;
         dotPos.x = -100;
@@ -1589,31 +1691,6 @@
       },
       { passive: true },
     );
-
-    // Render loop with smooth lerping
-    function renderCursor() {
-      if (isFinePointer && settings.cursor && settings.motion !== "off") {
-        dotPos.x += (mouse.x - dotPos.x) * 0.75;
-        dotPos.y += (mouse.y - dotPos.y) * 0.75;
-        ringPos.x += (mouse.x - ringPos.x) * 0.25;
-        ringPos.y += (mouse.y - ringPos.y) * 0.25;
-
-        dot.style.transform =
-          "translate3d(" +
-          dotPos.x +
-          "px, " +
-          dotPos.y +
-          "px, 0) translate(-50%, -50%)";
-        ring.style.transform =
-          "translate3d(" +
-          ringPos.x +
-          "px, " +
-          ringPos.y +
-          "px, 0) translate(-50%, -50%)";
-      }
-      requestAnimationFrame(renderCursor);
-    }
-    renderCursor();
 
     // Contextual Hover States
     document.addEventListener("mouseover", function (e) {
