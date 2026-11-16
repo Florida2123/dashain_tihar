@@ -173,45 +173,24 @@
 /* --------------------------------------------------------------------------
    THEME PRESETS: DARK MODE ("Tihar Night")
    -------------------------------------------------------------------------- */
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] {
-    --color-bg: #1C0F1B;
-    --color-surface: #2B1829;
-    --color-surface-hover: #382035;
-    --color-surface-card: rgba(43, 24, 41, 0.7);
-    --color-text: #FFE9F1;
-    --color-text-muted: #D1AEC0;
-    --color-border: rgba(255, 134, 176, 0.25);
-    --color-border-subtle: rgba(255, 134, 176, 0.12);
-    --color-petal: #85375A;
-    --color-shadow: rgba(0, 0, 0, 0.5);
-    --shadow-arch: 0 24px 60px -12px rgba(255, 134, 176, 0.16);
-  }
-  :root[data-theme="auto"][data-accent="sakura"] { --color-accent: #FF86B0; --color-accent-text: #1C0F1B; }
-  :root[data-theme="auto"][data-accent="makhamali"] { --color-accent: #E58BD0; --color-accent-text: #1C0F1B; }
-  :root[data-theme="auto"][data-accent="sayapatri"] { --color-accent: #FFB627; --color-accent-text: #1C0F1B; }
-  :root[data-theme="auto"][data-accent="tika"] { --color-accent: #FF5A68; --color-accent-text: #1C0F1B; }
-  :root[data-theme="auto"][data-accent="lilac"] { --color-accent: #BFA3F5; --color-accent-text: #1C0F1B; }
-}
-
 [data-theme="dark"] {
-  --color-bg: #1C0F1B;
-  --color-surface: #2B1829;
-  --color-surface-hover: #382035;
-  --color-surface-card: rgba(43, 24, 41, 0.7);
-  --color-text: #FFE9F1;
-  --color-text-muted: #D1AEC0;
-  --color-border: rgba(255, 134, 176, 0.25);
-  --color-border-subtle: rgba(255, 134, 176, 0.12);
-  --color-petal: #85375A;
-  --color-shadow: rgba(0, 0, 0, 0.5);
-  --shadow-arch: 0 24px 60px -12px rgba(255, 134, 176, 0.16);
+  --color-bg: #0E0D12;
+  --color-surface: #181620;
+  --color-surface-hover: #242130;
+  --color-surface-card: rgba(24, 22, 32, 0.82);
+  --color-text: #F7F5FA;
+  --color-text-muted: #A39BAF;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-petal: #A34870;
+  --color-shadow: rgba(0, 0, 0, 0.65);
+  --shadow-arch: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 40px -8px rgba(255, 101, 153, 0.2);
 }
-[data-theme="dark"][data-accent="sakura"] { --color-accent: #FF86B0; --color-accent-text: #1C0F1B; }
-[data-theme="dark"][data-accent="makhamali"] { --color-accent: #E58BD0; --color-accent-text: #1C0F1B; }
-[data-theme="dark"][data-accent="sayapatri"] { --color-accent: #FFB627; --color-accent-text: #1C0F1B; }
-[data-theme="dark"][data-accent="tika"] { --color-accent: #FF5A68; --color-accent-text: #1C0F1B; }
-[data-theme="dark"][data-accent="lilac"] { --color-accent: #BFA3F5; --color-accent-text: #1C0F1B; }
+[data-theme="dark"][data-accent="sakura"] { --color-accent: #FF6599; --color-accent-twin: #FFA3C4; --color-accent-text: #0E0D12; }
+[data-theme="dark"][data-accent="makhamali"] { --color-accent: #D475E8; --color-accent-twin: #E8A8F5; --color-accent-text: #0E0D12; }
+[data-theme="dark"][data-accent="sayapatri"] { --color-accent: #FFAE1A; --color-accent-twin: #FFD27A; --color-accent-text: #0E0D12; }
+[data-theme="dark"][data-accent="tika"] { --color-accent: #FF4D63; --color-accent-twin: #FFA1AC; --color-accent-text: #FFFFFF; }
+[data-theme="dark"][data-accent="lilac"] { --color-accent: #A78BFA; --color-accent-twin: #DDD6FE; --color-accent-text: #0E0D12; }
 
 /* --------------------------------------------------------------------------
    2. RESET & BASE STYLES
@@ -392,6 +371,19 @@ button {
               var(--color-bg);
 }
 
+[data-theme="dark"] .bg-dashain {
+  background: radial-gradient(circle at 18% 25%, rgba(255, 101, 153, 0.08) 0%, transparent 60%),
+              radial-gradient(circle at 82% 75%, rgba(167, 139, 250, 0.05) 0%, transparent 55%),
+              var(--color-bg);
+}
+
+[data-theme="dark"] .bg-tihar {
+  background: radial-gradient(circle at 80% 20%, rgba(255, 174, 26, 0.12) 0%, transparent 50%),
+              radial-gradient(circle at 15% 70%, rgba(255, 101, 153, 0.08) 0%, transparent 55%),
+              radial-gradient(circle at 50% 50%, rgba(212, 117, 232, 0.06) 0%, transparent 65%),
+              var(--color-bg);
+}
+
 /* Subtle Film Grain */
 .bg-grain {
   position: fixed;
@@ -446,7 +438,7 @@ button {
 .curtain-right { right: 0; transform-origin: right center; }
 
 [data-theme="dark"] .curtain-panel {
-  background: linear-gradient(135deg, #2B1829 0%, #1C0F1B 100%);
+  background: linear-gradient(135deg, #181620 0%, #0E0D12 100%);
 }
 
 .curtain-content {
@@ -536,11 +528,12 @@ button {
 }
 
 [data-theme="dark"] .nav-pill {
-  background: rgba(28, 15, 27, 0.88);
+  background: rgba(18, 16, 24, 0.88);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 @supports (backdrop-filter: blur(16px)) {
   [data-theme="dark"] .nav-pill {
-    background: rgba(28, 15, 27, 0.76);
+    background: rgba(18, 16, 24, 0.78);
   }
 }
 
@@ -930,10 +923,13 @@ button {
   color: var(--color-accent-text);
   box-shadow: 0 4px 18px -2px rgba(190, 53, 105, 0.35);
 }
+[data-theme="dark"] .btn-primary {
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.6);
+}
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:hover {
-    background-color: var(--color-rose-hover);
-    box-shadow: 0 8px 24px -2px rgba(190, 53, 105, 0.45);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -1129,6 +1125,10 @@ button {
   max-width: min(100%, 44ch);
 }
 
+[data-theme="dark"] .margin-note {
+  background: rgba(255, 101, 153, 0.12);
+}
+
 @media (min-width: 700px) {
   .margin-note {
     display: inline-block;
@@ -1316,7 +1316,7 @@ button {
   left: 0;
   right: 0;
   padding: 1.25rem 1.5rem 1rem;
-  background: linear-gradient(to top, rgba(28, 15, 27, 0.88), transparent);
+  background: linear-gradient(to top, rgba(14, 13, 18, 0.92), transparent);
   color: #FFFFFF;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -1587,7 +1587,7 @@ button {
   left: 0;
   right: 0;
   padding: 1.5rem 1rem 0.75rem;
-  background: linear-gradient(to top, rgba(28, 15, 27, 0.88), transparent);
+  background: linear-gradient(to top, rgba(14, 13, 18, 0.92), transparent);
   color: #FFFFFF;
   display: flex;
   flex-direction: column;
@@ -1955,12 +1955,12 @@ button {
 .lightbox-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(28, 15, 27, 0.92);
+  background: rgba(10, 9, 14, 0.94);
 }
 
 @supports (backdrop-filter: blur(20px)) {
   .lightbox-backdrop {
-    background: rgba(28, 15, 27, 0.85);
+    background: rgba(10, 9, 14, 0.88);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
@@ -2143,7 +2143,8 @@ button {
 }
 
 [data-theme="dark"] .settings-fab {
-  background: rgba(43, 24, 41, 0.85);
+  background: rgba(24, 22, 32, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .fab-sakura-icon {
@@ -2200,13 +2201,18 @@ button {
   overflow: hidden;
 }
 
+[data-theme="dark"] .settings-panel {
+  background: #181620;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 @supports (backdrop-filter: blur(16px)) {
   .settings-panel {
     background: rgba(255, 247, 249, 0.94);
     backdrop-filter: blur(16px);
   }
   [data-theme="dark"] .settings-panel {
-    background: rgba(28, 15, 27, 0.94);
+    background: rgba(24, 22, 32, 0.94);
   }
 }
 

@@ -5,7 +5,7 @@
   YEAR: [year]
 -->
 <!DOCTYPE html>
-<html lang="en" data-theme="auto" data-accent="sakura" data-font="editorial" data-size="normal" data-grain="true" data-notes="true" data-wall="masonry" data-motion="full" data-cursor="true">
+<html lang="en" data-theme="light" data-accent="sakura" data-font="editorial" data-size="normal" data-grain="true" data-notes="true" data-wall="masonry" data-motion="full" data-cursor="true">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -35,7 +35,10 @@
         if (raw) {
           var s = JSON.parse(raw);
           var doc = document.documentElement;
-          if (s.theme) doc.setAttribute('data-theme', s.theme);
+          if (s.theme) {
+            var th = s.theme === 'auto' ? 'light' : s.theme;
+            doc.setAttribute('data-theme', th);
+          }
           if (s.accent) doc.setAttribute('data-accent', s.accent);
           if (s.customAccent) doc.style.setProperty('--color-accent-custom', s.customAccent);
           if (s.font) doc.setAttribute('data-font', s.font);
@@ -791,16 +794,12 @@
             <span class="setting-label">Mode</span>
             <div class="segmented-control" role="radiogroup" aria-label="Theme mode">
               <label class="segment-label">
-                <input type="radio" name="setting-theme" value="light">
+                <input type="radio" name="setting-theme" value="light" checked>
                 <span>Light</span>
               </label>
               <label class="segment-label">
                 <input type="radio" name="setting-theme" value="dark">
                 <span>Dark</span>
-              </label>
-              <label class="segment-label">
-                <input type="radio" name="setting-theme" value="auto" checked>
-                <span>Auto</span>
               </label>
             </div>
           </div>

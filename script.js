@@ -15,7 +15,7 @@
 
   var DEFAULT_SETTINGS = {
     look: "default",
-    theme: "auto", // 'light' | 'dark' | 'auto'
+    theme: "light", // 'light' | 'dark'
     accent: "sakura", // 'sakura' | 'makhamali' | 'sayapatri' | 'tika' | 'lilac' | 'custom'
     customAccent: "#BE3569",
     font: "editorial", // 'editorial' | 'modern' | 'soft'
@@ -41,6 +41,7 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
+        if (parsed.theme === "auto") parsed.theme = "light";
         settings = Object.assign({}, DEFAULT_SETTINGS, parsed);
       }
     } catch (e) {
@@ -92,11 +93,8 @@
     // Update Theme Color Meta Tag
     var metaTheme = document.getElementById("meta-theme-color");
     if (metaTheme) {
-      var isDark =
-        settings.theme === "dark" ||
-        (settings.theme === "auto" &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-      metaTheme.setAttribute("content", isDark ? "#1C0F1B" : "#FFF7F9");
+      var isDark = settings.theme === "dark";
+      metaTheme.setAttribute("content", isDark ? "#0E0D12" : "#FFF7F9");
     }
   }
 
@@ -124,7 +122,7 @@
       var lumAccent = getLuminance(hex);
       var lumBg =
         settings.theme === "dark"
-          ? getLuminance("#1C0F1B")
+          ? getLuminance("#0E0D12")
           : getLuminance("#FFF7F9");
       var brightest = Math.max(lumAccent, lumBg);
       var darkest = Math.min(lumAccent, lumBg);
